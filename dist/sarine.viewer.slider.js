@@ -1,6 +1,6 @@
 
 /*!
-sarine.viewer.slider - v0.4.0 -  Tuesday, October 25th, 2016, 9:31:23 AM 
+sarine.viewer.slider - v0.4.0 -  Sunday, October 30th, 2016, 2:12:22 PM 
  The source code, name, and look and feel of the software are Copyright © 2015 Sarine Technologies Ltd. All Rights Reserved. You may not duplicate, copy, reuse, sell or otherwise exploit any portion of the code, content or visual design elements without express written permission from Sarine Technologies Ltd. The terms and conditions of the sarine.com website (http://sarine.com/terms-and-conditions/) apply to the access and use of this software.
  */
 
@@ -20,9 +20,11 @@ sarine.viewer.slider - v0.4.0 -  Tuesday, October 25th, 2016, 9:31:23 AM
     function SarineSlider(options) {
       this.preloadAssets = __bind(this.preloadAssets, this);
       SarineSlider.__super__.constructor.call(this, options);
-      this.ImagesPath = options.ImagesPath, this.ImageName = options.ImageName, this.NumberOfImages = options.NumberOfImages, this.ImageExtention = options.ImageExtention, this.ImagePrefix = options.ImagePrefix;
       this.isAvailble = true;
       this.resourcesPrefix = options.baseUrl + "atomic/v1/assets/";
+      this.atomConfig = configuration.experiences.filter(function(exp) {
+        return exp.atom === "jewelrySequence";
+      })[0];
       this.resources = [
         {
           element: 'script',
@@ -86,7 +88,8 @@ sarine.viewer.slider - v0.4.0 -  Tuesday, October 25th, 2016, 9:31:23 AM
       _t = this;
       this.preloadAssets(function() {
         var src;
-        src = configuration.configUrl + _t.ImagesPath + _t.ImageName + _t.ImageExtention;
+        this.firstImageName = _t.atomConfig.imagePattern.replace("*", "1");
+        src = "" + configuration.rawdataBaseUrl + "/" + _t.atomConfig.ImagesPath + "/" + configuration.jewelryId + "/slider/" + this.firstImageName + cacheVersion;
         return _t.loadImage(src).then(function(img) {
           if (img.src.indexOf('data:image') === -1 && img.src.indexOf('no_stone') === -1) {
             return defer.resolve(_t);
@@ -113,15 +116,19 @@ sarine.viewer.slider - v0.4.0 -  Tuesday, October 25th, 2016, 9:31:23 AM
       var defer;
       defer = $.Deferred();
       if (this.isAvailble) {
-        $('.ringImg').ThreeSixty({
-          totalFrames: this.NumberOfImages,
-          endFrame: this.NumberOfImages,
+        this.ringImg = this.element.find('.ringImg');
+        this.imagePath = "" + configuration.rawdataBaseUrl + "/" + this.atomConfig.ImagesPath + "/" + configuration.jewelryId + "/slider/";
+        this.filePrefix = this.atomConfig.imagePattern.replace(/\*.[^/.]+$/, '');
+        this.fileExt = "." + (this.atomConfig.imagePattern.split('.').pop());
+        this.ringImg.ThreeSixty({
+          totalFrames: this.atomConfig.NumberOfImages,
+          endFrame: this.atomConfig.NumberOfImages,
           currentFrame: 1,
           imgList: '.threesixty_images',
           progress: '.spinner',
-          imagePath: configuration.configUrl + '/images/',
-          filePrefix: this.ImagePrefix,
-          ext: this.ImageExtention,
+          imagePath: this.imagePath,
+          filePrefix: this.filePrefix,
+          ext: this.fileExt + cacheVersion,
           height: pluginDimention,
           width: pluginDimention,
           navigation: false,
