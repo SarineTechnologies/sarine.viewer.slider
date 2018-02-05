@@ -36,8 +36,8 @@ module.exports = function(grunt) {
         uglify: {
             options: {
                 preserveComments: 'some',
-                banner: '###!\n<%= config.name %> - v<%= config.version %> - ' +
-                        ' <%= grunt.template.today("dddd, mmmm dS, yyyy, h:MM:ss TT") %> ' + '\n ' + grunt.file.read("copyright.txt") + '\n###\n'
+                banner: '/*\n<%= config.name %> - v<%= config.version %> - ' +
+                        ' <%= grunt.template.today("dddd, mmmm dS, yyyy, h:MM:ss TT") %> ' + '\n ' + grunt.file.read("copyright.txt") + '\n*/\n'
             },
             build: {
                 src: config.dist.root + '/<%= config.name %>.js',
@@ -94,7 +94,8 @@ module.exports = function(grunt) {
         'uglify',
         'clean:postbuild',
         'copyVersion',
-        'copy:bundle'
+        'copy:bundle',
+        'clean:bundlecoffee' //remove bundle.coffe file - not necessary
     ]);
 
     grunt.registerTask('copyVersion' , 'copy version from package.json to sarine.viewer.clarity.config' , function (){
@@ -139,7 +140,7 @@ module.exports = function(grunt) {
         {
             core = 
             [
-                'node_modules/sarine.viewer/coffee/sarine.viewer.bundle.coffee'
+                'node_modules/sarine.viewer/coffee/sarine.viewer.coffee'
             ]
 
             grunt.log.writeln("taking core files from node_modules");
@@ -148,7 +149,7 @@ module.exports = function(grunt) {
         {
             core = 
             [
-                '../../core/sarine.viewer/coffee/sarine.viewer.bundle.coffee'
+                '../../core/sarine.viewer/coffee/sarine.viewer.coffee'
             ]
 
             grunt.log.writeln("taking core files from parent folder");
