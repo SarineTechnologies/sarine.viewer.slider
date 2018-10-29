@@ -1,16 +1,13 @@
-###!
-sarine.viewer.slider - v0.4.0 -  Tuesday, October 25th, 2016, 9:31:23 AM 
- The source code, name, and look and feel of the software are Copyright © 2015 Sarine Technologies Ltd. All Rights Reserved. You may not duplicate, copy, reuse, sell or otherwise exploit any portion of the code, content or visual design elements without express written permission from Sarine Technologies Ltd. The terms and conditions of the sarine.com website (http://sarine.com/terms-and-conditions/) apply to the access and use of this software.
-###
+
 class SarineSlider extends Viewer
 	
 	pluginDimention = undefined
 
 	constructor: (options) -> 			
-		super(options)	
-		{@ImagesPath, @ImageName, @NumberOfImages, @ImageExtention, @ImagePrefix} = options	
+		super(options)
 		@isAvailble = true
-		@resourcesPrefix = options.baseUrl + "atomic/v1/assets/"	
+		@resourcesPrefix = options.baseUrl + "atomic/v1/assets/"
+		@atomConfig = configuration.experiences.filter((exp)-> exp.atom == "jewelrySequence")[0] 	
 		@resources = [
 	      {element:'script',src:'threesixty.min.js'},
 	      {element:'link',src:'threesixty.css'}
@@ -51,7 +48,8 @@ class SarineSlider extends Viewer
 		defer = $.Deferred() 
 		_t = @
 		@preloadAssets ()->
-			src = configuration.configUrl + _t.ImagesPath + _t.ImageName + _t.ImageExtention
+			@firstImageName = _t.atomConfig.imagePattern.replace("*","1") 
+			src = "#{configuration.rawdataBaseUrl}/#{_t.atomConfig.ImagesPath}/#{configuration.jewelryId}/slider/#{@firstImageName}#{cacheVersion}"
 			_t.loadImage(src).then((img)->	
 				if img.src.indexOf('data:image') == -1 && img.src.indexOf('no_stone') == -1			
 					defer.resolve(_t)
@@ -71,17 +69,21 @@ class SarineSlider extends Viewer
 
 	full_init : ()-> 
 		defer = $.Deferred()
-		if @isAvailble
-			$('.ringImg').ThreeSixty({
-				totalFrames: @NumberOfImages, # Total no. of image you have for 360 slider
-				endFrame: @NumberOfImages, # end frame for the auto spin animation
+		if @isAvailble 
+			@ringImg = @element.find('.ringImg')
+			@imagePath = "#{configuration.rawdataBaseUrl}/#{@atomConfig.ImagesPath}/#{configuration.jewelryId}/slider/"
+			@filePrefix = @atomConfig.imagePattern.replace(/\*.[^/.]+$/,'')
+			@fileExt = ".#{@atomConfig.imagePattern.split('.').pop()}"
+			@ringImg.ThreeSixty({
+				totalFrames: @atomConfig.NumberOfImages, # Total no. of image you have for 360 slider
+				endFrame: @atomConfig.NumberOfImages, # end frame for the auto spin animation
 				currentFrame: 1, # This the start frame for auto spin
 				imgList: '.threesixty_images', # selector for image list
 				progress: '.spinner', # selector to show the loading progress
-				imagePath: configuration.configUrl + '/images/', # path of the image assets
-				filePrefix: @ImagePrefix, # file prefix if any
-				ext: @ImageExtention, # extention for the assets
-				height: pluginDimention,
+				imagePath: @imagePath, # path of the image assets
+				filePrefix: @filePrefix, # file prefix if any 
+				ext: @fileExt + cacheVersion, # extention for the assets
+				height: pluginDimention, 
 				width: pluginDimention,
 				navigation: false,
 				responsive: true
